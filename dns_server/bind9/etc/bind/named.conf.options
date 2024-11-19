@@ -1,0 +1,5 @@
+@"
+options {
+    dump-file "/var/cache/bind/dump.db";
+};
+"@ > dns_config/bind/named.conf.options

@@ -1,0 +1,45 @@
+version: "3.9"
+
+networks:
+  virtual_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.0.0/24
+
+services:
+  user:
+    build:
+      context: ./user
+    image: ubuntu:latest
+    container_name: user
+    networks:
+      virtual_network:
+        ipv4_address: 192.168.0.100
+    tty: true
+    command: ["/bin/bash", "-c", "echo 'nameserver 192.168.0.10' > /etc/resolv.conf && bash"]
+
+  dns_server:
+    build:
+      context: ./dns_server
+    image: dns-server:latest
+    container_name: dns_server
+    networks:
+      virtual_network:
+        ipv4_address: 192.168.0.10
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    tty: true
+    command: ["/usr/sbin/named", "-f"]
+
+  attacker:
+    build:
+      context: ./attacker
+    image: ubuntu:latest
+    container_name: attacker
+    networks:
+      virtual_network:
+        ipv4_address: 192.168.0.200
+    tty: true
+    command: ["/bin/bash", "-c", "echo 'nameserver 192.168.0.10' > /etc/resolv.conf && bash"]
